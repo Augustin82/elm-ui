@@ -212,8 +212,10 @@ You'll also need to retrieve the initial window size. You can either use [`Brows
 
 -}
 
-import Html exposing (Html)
+import Html
 import Html.Attributes
+import Html.String as HS
+import Html.String.Attributes as HSA
 import Internal.Flag as Flag exposing (Flag)
 import Internal.Model as Internal
 import Internal.Style exposing (classes)
@@ -345,13 +347,13 @@ type alias Decoration =
 
 
 {-| -}
-html : Html msg -> Element msg
+html : HS.Html msg -> Element msg
 html =
     Internal.unstyled
 
 
 {-| -}
-htmlAttribute : Html.Attribute msg -> Attribute msg
+htmlAttribute : HS.Attribute msg -> Attribute msg
 htmlAttribute =
     Internal.Attr
 
@@ -441,13 +443,13 @@ fillPortion =
 
 {-| This is your top level node where you can turn `Element` into `Html`.
 -}
-layout : List (Attribute msg) -> Element msg -> Html msg
+layout : List (Attribute msg) -> Element msg -> HS.Html msg
 layout =
     layoutWith { options = [] }
 
 
 {-| -}
-layoutWith : { options : List Option } -> List (Attribute msg) -> Element msg -> Html msg
+layoutWith : { options : List Option } -> List (Attribute msg) -> Element msg -> HS.Html msg
 layoutWith { options } attrs child =
     Internal.renderRoot options
         (Internal.htmlClass
@@ -724,7 +726,7 @@ wrappedRow attrs children =
                                         ++ classes.wrapped
                                     )
                                     :: Internal.Attr
-                                        (Html.Attributes.style "margin"
+                                        (HSA.style "margin"
                                             (String.fromFloat halfY
                                                 ++ "px"
                                                 ++ " "
@@ -733,14 +735,14 @@ wrappedRow attrs children =
                                             )
                                         )
                                     :: Internal.Attr
-                                        (Html.Attributes.style "width"
+                                        (HSA.style "width"
                                             ("calc(100% + "
                                                 ++ String.fromInt x
                                                 ++ "px)"
                                             )
                                         )
                                     :: Internal.Attr
-                                        (Html.Attributes.style "height"
+                                        (HSA.style "height"
                                             ("calc(100% + "
                                                 ++ String.fromInt y
                                                 ++ "px)"
@@ -1128,8 +1130,8 @@ image attrs { src, description } =
             [ Internal.element
                 Internal.asEl
                 (Internal.NodeName "img")
-                ([ Internal.Attr <| Html.Attributes.src src
-                 , Internal.Attr <| Html.Attributes.alt description
+                ([ Internal.Attr <| HSA.src src
+                 , Internal.Attr <| HSA.alt description
                  ]
                     ++ imageAttributes
                 )
@@ -1157,8 +1159,8 @@ link attrs { url, label } =
     Internal.element
         Internal.asEl
         (Internal.NodeName "a")
-        (Internal.Attr (Html.Attributes.href url)
-            :: Internal.Attr (Html.Attributes.rel "noopener noreferrer")
+        (Internal.Attr (HSA.href url)
+            :: Internal.Attr (HSA.rel "noopener noreferrer")
             :: width shrink
             :: height shrink
             :: Internal.htmlClass
@@ -1185,9 +1187,9 @@ newTabLink attrs { url, label } =
     Internal.element
         Internal.asEl
         (Internal.NodeName "a")
-        (Internal.Attr (Html.Attributes.href url)
-            :: Internal.Attr (Html.Attributes.rel "noopener noreferrer")
-            :: Internal.Attr (Html.Attributes.target "_blank")
+        (Internal.Attr (HSA.href url)
+            :: Internal.Attr (HSA.rel "noopener noreferrer")
+            :: Internal.Attr (HSA.target "_blank")
             :: width shrink
             :: height shrink
             :: Internal.htmlClass
@@ -1215,8 +1217,8 @@ download attrs { url, label } =
     Internal.element
         Internal.asEl
         (Internal.NodeName "a")
-        (Internal.Attr (Html.Attributes.href url)
-            :: Internal.Attr (Html.Attributes.download "")
+        (Internal.Attr (HSA.href url)
+            :: Internal.Attr (HSA.download "")
             :: width shrink
             :: height shrink
             :: Internal.htmlClass classes.contentCenterX
@@ -1240,8 +1242,8 @@ downloadAs attrs { url, filename, label } =
     Internal.element
         Internal.asEl
         (Internal.NodeName "a")
-        (Internal.Attr (Html.Attributes.href url)
-            :: Internal.Attr (Html.Attributes.download filename)
+        (Internal.Attr (HSA.href url)
+            :: Internal.Attr (HSA.download filename)
             :: width shrink
             :: height shrink
             :: Internal.htmlClass classes.contentCenterX

@@ -110,18 +110,20 @@ module Internal.Model exposing
 import Html
 import Html.Attributes
 import Html.Keyed
+import Html.String as HS
+import Html.String.Attributes as HSA
+import Html.String.Keyed as HSK
 import Internal.Flag as Flag exposing (Flag)
 import Internal.Style exposing (classes, dot)
 import Json.Encode as Encode
 import Set exposing (Set)
-import VirtualDom
 
 
 type Element msg
-    = Unstyled (LayoutContext -> VirtualDom.Node msg)
+    = Unstyled (LayoutContext -> HS.Html msg)
     | Styled
         { styles : List Style
-        , html : EmbedStyle -> LayoutContext -> VirtualDom.Node msg
+        , html : EmbedStyle -> LayoutContext -> HS.Html msg
         }
     | Text String
     | Empty
@@ -301,7 +303,7 @@ type alias Angle =
 
 type Attribute aligned msg
     = NoAttribute
-    | Attr (VirtualDom.Attribute msg)
+    | Attr (HS.Attribute msg)
     | Describe Description
       -- invalidation key and literal class
     | Class Flag String
@@ -374,9 +376,9 @@ type NodeName
 
 type NearbyChildren msg
     = NoNearbyChildren
-    | ChildrenBehind (List (Html.Html msg))
-    | ChildrenInFront (List (Html.Html msg))
-    | ChildrenBehindAndInFront (List (Html.Html msg)) (List (Html.Html msg))
+    | ChildrenBehind (List (HS.Html msg))
+    | ChildrenInFront (List (HS.Html msg))
+    | ChildrenBehindAndInFront (List (HS.Html msg)) (List (HS.Html msg))
 
 
 div =
@@ -385,7 +387,7 @@ div =
 
 type alias Gathered msg =
     { node : NodeName
-    , attributes : List (VirtualDom.Attribute msg)
+    , attributes : List (HS.Attribute msg)
     , styles : List Style
     , children : NearbyChildren msg
     , has : Flag.Field
@@ -394,11 +396,11 @@ type alias Gathered msg =
 
 htmlClass : String -> Attribute aligned msg
 htmlClass cls =
-    Attr <| Html.Attributes.class cls
+    Attr <| HSA.class cls
 
 
 {-| -}
-unstyled : VirtualDom.Node msg -> Element msg
+unstyled : HS.Html msg -> Element msg
 unstyled =
     Unstyled << always
 
@@ -408,7 +410,7 @@ finalizeNode has node attributes children embedMode parentContext =
         createNode nodeName attrs =
             case children of
                 Keyed keyed ->
-                    VirtualDom.keyedNode nodeName
+                    HSK.node nodeName
                         attrs
                         (case embedMode of
                             NoStyleSheet ->
@@ -424,13 +426,13 @@ finalizeNode has node attributes children embedMode parentContext =
                 Unkeyed unkeyed ->
                     (case nodeName of
                         "div" ->
-                            Html.div
+                            HS.div
 
                         "p" ->
-                            Html.p
+                            HS.p
 
                         _ ->
-                            VirtualDom.node nodeName
+                            HS.node nodeName
                     )
                         attrs
                         (case embedMode of
@@ -453,10 +455,10 @@ finalizeNode has node attributes children embedMode parentContext =
                     createNode nodeName attributes
 
                 Embedded nodeName internal ->
-                    VirtualDom.node nodeName
+                    HS.node nodeName
                         attributes
                         [ createNode internal
-                            [ Html.Attributes.class
+                            [ HSA.class
                                 (classes.any ++ " " ++ classes.single)
                             ]
                         ]
@@ -467,8 +469,8 @@ finalizeNode has node attributes children embedMode parentContext =
                 html
 
             else if Flag.present Flag.alignRight has then
-                Html.u
-                    [ Html.Attributes.class
+                HS.u
+                    [ HSA.class
                         (String.join " "
                             [ classes.any
                             , classes.single
@@ -481,8 +483,8 @@ finalizeNode has node attributes children embedMode parentContext =
                     [ html ]
 
             else if Flag.present Flag.centerX has then
-                Html.s
-                    [ Html.Attributes.class
+                HS.s
+                    [ HSA.class
                         (String.join " "
                             [ classes.any
                             , classes.single
@@ -502,8 +504,8 @@ finalizeNode has node attributes children embedMode parentContext =
                 html
 
             else if Flag.present Flag.centerY has then
-                Html.s
-                    [ Html.Attributes.class
+                HS.s
+                    [ HSA.class
                         (String.join " "
                             [ classes.any
                             , classes.single
@@ -515,8 +517,8 @@ finalizeNode has node attributes children embedMode parentContext =
                     [ html ]
 
             else if Flag.present Flag.alignBottom has then
-                Html.u
-                    [ Html.Attributes.class
+                HS.u
+                    [ HSA.class
                         (String.join " "
                             [ classes.any
                             , classes.single
@@ -895,7 +897,7 @@ gatherAttrRecursive :
     -> Flag.Field
     -> Transformation
     -> List Style
-    -> List (VirtualDom.Attribute msg)
+    -> List (HS.Attribute msg)
     -> NearbyChildren msg
     -> List (Attribute aligned msg)
     -> Gathered msg
@@ -904,7 +906,7 @@ gatherAttrRecursive classes node has transform styles attrs children elementAttr
         [] ->
             case transformClass transform of
                 Nothing ->
-                    { attributes = Html.Attributes.class classes :: attrs
+                    { attributes = HSA.class classes :: attrs
                     , styles = styles
                     , node = node
                     , children = children
@@ -912,7 +914,7 @@ gatherAttrRecursive classes node has transform styles attrs children elementAttr
                     }
 
                 Just class ->
-                    { attributes = Html.Attributes.class (classes ++ " " ++ class) :: attrs
+                    { attributes = HSA.class (classes ++ " " ++ class) :: attrs
                     , styles = Transform transform :: styles
                     , node = node
                     , children = children
@@ -1159,16 +1161,16 @@ gatherAttrRecursive classes node has transform styles attrs children elementAttr
                                 remaining
 
                         Button ->
-                            gatherAttrRecursive classes node has transform styles (VirtualDom.attribute "role" "button" :: attrs) children remaining
+                            gatherAttrRecursive classes node has transform styles (HSA.attribute "role" "button" :: attrs) children remaining
 
                         Label label ->
-                            gatherAttrRecursive classes node has transform styles (VirtualDom.attribute "aria-label" label :: attrs) children remaining
+                            gatherAttrRecursive classes node has transform styles (HSA.attribute "aria-label" label :: attrs) children remaining
 
                         LivePolite ->
-                            gatherAttrRecursive classes node has transform styles (VirtualDom.attribute "aria-live" "polite" :: attrs) children remaining
+                            gatherAttrRecursive classes node has transform styles (HSA.attribute "aria-live" "polite" :: attrs) children remaining
 
                         LiveAssertive ->
-                            gatherAttrRecursive classes node has transform styles (VirtualDom.attribute "aria-live" "assertive" :: attrs) children remaining
+                            gatherAttrRecursive classes node has transform styles (HSA.attribute "aria-live" "assertive" :: attrs) children remaining
 
                 Nearby location elem ->
                     let
@@ -1290,8 +1292,8 @@ addNearbyElement location elem existing =
 
 
 nearbyElement location elem =
-    Html.div
-        [ Html.Attributes.class <|
+    HS.div
+        [ HSA.class <|
             case location of
                 Above ->
                     String.join " "
@@ -1337,7 +1339,7 @@ nearbyElement location elem =
         ]
         [ case elem of
             Empty ->
-                VirtualDom.text ""
+                HS.text ""
 
             Text str ->
                 textElement str
@@ -1817,20 +1819,20 @@ defaultOptions =
     }
 
 
-staticRoot : OptionRecord -> VirtualDom.Node msg
+staticRoot : OptionRecord -> HS.Html msg
 staticRoot opts =
     case opts.mode of
         Layout ->
             -- wrap the style node in a div to prevent `Dark Reader` from blowin up the dom.
-            VirtualDom.node "div"
+            HS.node "div"
                 []
-                [ VirtualDom.node "style" [] [ VirtualDom.text Internal.Style.rules ] ]
+                [ HS.node "style" [] [ HS.text Internal.Style.rules ] ]
 
         NoStaticStyleSheet ->
-            VirtualDom.text ""
+            HS.text ""
 
         WithVirtualCss ->
-            VirtualDom.node "elm-ui-static-rules" [ VirtualDom.property "rules" (Encode.string Internal.Style.rules) ] []
+            HS.node "elm-ui-static-rules" [ HSA.property "rules" (Encode.string Internal.Style.rules) ] []
 
 
 addWhen ifThis x to =
@@ -2055,13 +2057,13 @@ textElementClasses =
         ++ classes.heightContent
 
 
-textElement : String -> VirtualDom.Node msg
+textElement : String -> HS.Html msg
 textElement str =
-    Html.div
-        [ Html.Attributes.class
+    HS.div
+        [ HSA.class
             textElementClasses
         ]
-        [ Html.text str ]
+        [ HS.text str ]
 
 
 textElementFillClasses : String
@@ -2075,13 +2077,13 @@ textElementFillClasses =
         ++ classes.heightFill
 
 
-textElementFill : String -> VirtualDom.Node msg
+textElementFill : String -> HS.Html msg
 textElementFill str =
-    Html.div
-        [ Html.Attributes.class
+    HS.div
+        [ HSA.class
             textElementFillClasses
         ]
-        [ Html.text str ]
+        [ HS.text str ]
 
 
 type Children x
@@ -2105,7 +2107,7 @@ toHtml mode el =
 
 
 {-| -}
-renderRoot : List Option -> List (Attribute aligned msg) -> Element msg -> VirtualDom.Node msg
+renderRoot : List Option -> List (Attribute aligned msg) -> Element msg -> HS.Html msg
 renderRoot optionList attributes child =
     let
         options =
@@ -2351,30 +2353,30 @@ optionsToRecord options =
             options
 
 
-toStyleSheet : OptionRecord -> List Style -> VirtualDom.Node msg
+toStyleSheet : OptionRecord -> List Style -> HS.Html msg
 toStyleSheet options styleSheet =
     case options.mode of
         Layout ->
             -- wrap the style node in a div to prevent `Dark Reader` from blowin up the dom.
-            VirtualDom.node "div"
+            HS.node "div"
                 []
-                [ VirtualDom.node "style"
+                [ HS.node "style"
                     []
-                    [ VirtualDom.text (toStyleSheetString options styleSheet) ]
+                    [ HS.text (toStyleSheetString options styleSheet) ]
                 ]
 
         NoStaticStyleSheet ->
             -- wrap the style node in a div to prevent `Dark Reader` from blowin up the dom.
-            VirtualDom.node "div"
+            HS.node "div"
                 []
-                [ VirtualDom.node "style"
+                [ HS.node "style"
                     []
-                    [ VirtualDom.text (toStyleSheetString options styleSheet) ]
+                    [ HS.text (toStyleSheetString options styleSheet) ]
                 ]
 
         WithVirtualCss ->
-            VirtualDom.node "elm-ui-rules"
-                [ VirtualDom.property "rules"
+            HS.node "elm-ui-rules"
+                [ HSA.property "rules"
                     (encodeStyles options styleSheet)
                 ]
                 []
@@ -3336,11 +3338,11 @@ map fn el =
         Styled styled ->
             Styled
                 { styles = styled.styles
-                , html = \add context -> VirtualDom.map fn <| styled.html add context
+                , html = \add context -> HS.map fn <| styled.html add context
                 }
 
         Unstyled html ->
-            Unstyled (VirtualDom.map fn << html)
+            Unstyled (HS.map fn << html)
 
         Text str ->
             Text str
@@ -3380,7 +3382,7 @@ mapAttr fn attr =
             Nearby location (map fn elem)
 
         Attr htmlAttr ->
-            Attr (VirtualDom.mapAttribute fn htmlAttr)
+            Attr (HSA.map fn htmlAttr)
 
         TransformComponent fl trans ->
             TransformComponent fl trans
@@ -3418,7 +3420,7 @@ mapAttrFromStyle fn attr =
             Nearby location (map fn elem)
 
         Attr htmlAttr ->
-            Attr (VirtualDom.mapAttribute fn htmlAttr)
+            Attr (HSA.map fn htmlAttr)
 
         TransformComponent fl trans ->
             TransformComponent fl trans

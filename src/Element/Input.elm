@@ -190,9 +190,9 @@ import Element.Border as Border
 import Element.Events as Events
 import Element.Font as Font
 import Element.Region as Region
-import Html
-import Html.Attributes
-import Html.Events
+import Html.String as HS
+import Html.String.Attributes as HSA
+import Html.String.Events as HSE
 import Internal.Flag as Flag
 import Internal.Model as Internal
 import Internal.Style exposing (classes)
@@ -362,10 +362,10 @@ button attrs { onPress, label } =
             :: Element.pointer
             :: focusDefault attrs
             :: Internal.Describe Internal.Button
-            :: Internal.Attr (Html.Attributes.tabindex 0)
+            :: Internal.Attr (HSA.tabindex 0)
             :: (case onPress of
                     Nothing ->
-                        Internal.Attr (Html.Attributes.disabled True) :: attrs
+                        Internal.Attr (HSA.disabled True) :: attrs
 
                     Just msg ->
                         Events.onClick msg
@@ -438,7 +438,7 @@ checkbox attrs { label, icon, checked, onChange } =
               else
                 Element.spacing
                     6
-            , Internal.Attr (Html.Events.onClick (onChange (not checked)))
+            , Internal.Attr (HSE.onClick (onChange (not checked)))
             , Region.announce
             , onKeyLookup <|
                 \code ->
@@ -458,9 +458,9 @@ checkbox attrs { label, icon, checked, onChange } =
                 ++ attrs
     in
     applyLabel
-        (Internal.Attr (Html.Attributes.attribute "role" "checkbox")
+        (Internal.Attr (HSA.attribute "role" "checkbox")
             :: Internal.Attr
-                (Html.Attributes.attribute "aria-checked" <|
+                (HSA.attribute "aria-checked" <|
                     if checked then
                         "true"
 
@@ -713,9 +713,9 @@ slider attributes input =
                         ("input[type=\"range\"]." ++ className ++ "::-ms-thumb")
                         thumbShadowStyle
                     )
-                , Internal.Attr (Html.Attributes.class (className ++ " ui-slide-bar focusable-parent"))
+                , Internal.Attr (HSA.class (className ++ " ui-slide-bar focusable-parent"))
                 , Internal.Attr
-                    (Html.Events.onInput
+                    (HSE.onInput
                         (\str ->
                             case String.toFloat str of
                                 Nothing ->
@@ -728,9 +728,9 @@ slider attributes input =
                         )
                     )
                 , Internal.Attr <|
-                    Html.Attributes.type_ "range"
+                    HSA.type_ "range"
                 , Internal.Attr <|
-                    Html.Attributes.step
+                    HSA.step
                         (case input.step of
                             Nothing ->
                                 -- Note: If we set `any` here,
@@ -745,14 +745,14 @@ slider attributes input =
                                 String.fromFloat step
                         )
                 , Internal.Attr <|
-                    Html.Attributes.min (String.fromFloat input.min)
+                    HSA.min (String.fromFloat input.min)
                 , Internal.Attr <|
-                    Html.Attributes.max (String.fromFloat input.max)
+                    HSA.max (String.fromFloat input.max)
                 , Internal.Attr <|
-                    Html.Attributes.value (String.fromFloat input.value)
+                    HSA.value (String.fromFloat input.value)
                 , if vertical then
                     Internal.Attr <|
-                        Html.Attributes.attribute "orient" "vertical"
+                        HSA.attribute "orient" "vertical"
 
                   else
                     Internal.NoAttribute
@@ -931,7 +931,7 @@ textHelper textInput attrs textOptions =
                         -- Note: Due to a weird edgecase in...Edge...
                         -- `type` needs to come _before_ `value`
                         -- More reading: https://github.com/mdgriffith/elm-ui/pull/94/commits/4f493a27001ccc3cf1f2baa82e092c35d3811876
-                        [ Internal.Attr (Html.Attributes.type_ inputType)
+                        [ Internal.Attr (HSA.type_ inputType)
                         , Internal.htmlClass classes.inputText
                         ]
 
@@ -945,12 +945,12 @@ textHelper textInput attrs textOptions =
                         -- that the cursor will reset correctly.
                         -- This could probably be combined with the above `calcMoveToCompensateForPadding`
                         , Element.paddingEach parentPadding
-                        , Internal.Attr (Html.Attributes.style "margin" (renderBox (negateBox parentPadding)))
-                        , Internal.Attr (Html.Attributes.style "box-sizing" "content-box")
+                        , Internal.Attr (HSA.style "margin" (renderBox (negateBox parentPadding)))
+                        , Internal.Attr (HSA.style "box-sizing" "content-box")
                         ]
                  )
                     ++ [ value textOptions.text
-                       , Internal.Attr (Html.Events.onInput textOptions.onChange)
+                       , Internal.Attr (HSE.onInput textOptions.onChange)
                        , hiddenLabelAttribute textOptions.label
                        , spellcheck textInput.spellchecked
                        , Maybe.map autofill textInput.autofill
@@ -1012,9 +1012,9 @@ textHelper textInput attrs textOptions =
 
                                      else
                                         [ Internal.unstyled
-                                            (Html.span [ Html.Attributes.class classes.inputMultilineFiller ]
+                                            (HS.span [ HSA.class classes.inputMultilineFiller ]
                                                 -- We append a non-breaking space to the end of the content so that newlines don't get chomped.
-                                                [ Html.text (textOptions.text ++ "\u{00A0}")
+                                                [ HS.text (textOptions.text ++ "\u{00A0}")
                                                 ]
                                             )
                                         ]
@@ -1326,14 +1326,14 @@ redistributeOver isMultiline stacked attr els =
                 let
                     newHeight =
                         Element.htmlAttribute
-                            (Html.Attributes.style
+                            (HSA.style
                                 "height"
                                 ("calc(1.0em + " ++ String.fromFloat (2 * min t b) ++ "px)")
                             )
 
                     newLineHeight =
                         Element.htmlAttribute
-                            (Html.Attributes.style
+                            (HSA.style
                                 "line-height"
                                 ("calc(1.0em + " ++ String.fromFloat (2 * min t b) ++ "px)")
                             )
@@ -1806,15 +1806,15 @@ radioHelper orientation attrs input =
                 , case status of
                     Selected ->
                         Internal.Attr <|
-                            Html.Attributes.attribute "aria-checked"
+                            HSA.attribute "aria-checked"
                                 "true"
 
                     _ ->
                         Internal.Attr <|
-                            Html.Attributes.attribute "aria-checked"
+                            HSA.attribute "aria-checked"
                                 "false"
                 , Internal.Attr <|
-                    Html.Attributes.attribute "role" "radio"
+                    HSA.attribute "role" "radio"
                 ]
                 (view status)
 
@@ -1890,7 +1890,7 @@ radioHelper orientation attrs input =
             , Just Region.announce
             , Just <|
                 Internal.Attr <|
-                    Html.Attributes.attribute "role" "radiogroup"
+                    HSA.attribute "role" "radiogroup"
             , case prevNext of
                 Nothing ->
                     Nothing
@@ -2065,7 +2065,7 @@ onKey desiredCode msg =
                 |> Json.andThen decode
     in
     Internal.Attr <|
-        Html.Events.preventDefaultOn "keyup"
+        HSE.preventDefaultOn "keyup"
             (Json.map (\fired -> ( fired, True )) isKey)
 
 
@@ -2108,60 +2108,60 @@ onKeyLookup lookup =
     -- We generally want these attached to the keydown event becaues it allows us to prevent default on things like spacebar scrolling the page.
     -- https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/button_role
     Internal.Attr <|
-        Html.Events.preventDefaultOn "keydown"
+        HSE.preventDefaultOn "keydown"
             (Json.map (\fired -> ( fired, True )) isKey)
 
 
 {-| -}
 onFocusOut : msg -> Attribute msg
 onFocusOut msg =
-    Internal.Attr <| Html.Events.on "focusout" (Json.succeed msg)
+    Internal.Attr <| HSE.on "focusout" (Json.succeed msg)
 
 
 {-| -}
 onFocusIn : msg -> Attribute msg
 onFocusIn msg =
-    Internal.Attr <| Html.Events.on "focusin" (Json.succeed msg)
+    Internal.Attr <| HSE.on "focusin" (Json.succeed msg)
 
 
 selected : Bool -> Attribute msg
 selected =
-    Internal.Attr << Html.Attributes.selected
+    Internal.Attr << HSA.selected
 
 
 name : String -> Attribute msg
 name =
-    Internal.Attr << Html.Attributes.name
+    Internal.Attr << HSA.name
 
 
 value : String -> Attribute msg
 value =
-    Internal.Attr << Html.Attributes.value
+    Internal.Attr << HSA.value
 
 
 tabindex : Int -> Attribute msg
 tabindex =
-    Internal.Attr << Html.Attributes.tabindex
+    Internal.Attr << HSA.tabindex
 
 
 disabled : Bool -> Attribute msg
 disabled =
-    Internal.Attr << Html.Attributes.disabled
+    Internal.Attr << HSA.disabled
 
 
 spellcheck : Bool -> Attribute msg
 spellcheck =
-    Internal.Attr << Html.Attributes.spellcheck
+    Internal.Attr << HSA.spellcheck
 
 
 readonly : Bool -> Attribute msg
 readonly =
-    Internal.Attr << Html.Attributes.readonly
+    Internal.Attr << HSA.readonly
 
 
 autofill : String -> Attribute msg
 autofill =
-    Internal.Attr << Html.Attributes.attribute "autocomplete"
+    Internal.Attr << HSA.attribute "autocomplete"
 
 
 {-| Attach this attribute to any `Input` that you would like to be automatically focused when the page loads.
@@ -2171,7 +2171,7 @@ You should only have a maximum of one per page.
 -}
 focusedOnLoad : Attribute msg
 focusedOnLoad =
-    Internal.Attr <| Html.Attributes.autofocus True
+    Internal.Attr <| HSA.autofocus True
 
 
 

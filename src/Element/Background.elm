@@ -17,9 +17,9 @@ module Element.Background exposing
 -}
 
 import Element exposing (Attr, Attribute, Color)
+import Html.String.Attributes as HSA
 import Internal.Flag as Flag
 import Internal.Model as Internal
-import VirtualDom
 
 
 {-| -}
@@ -32,35 +32,35 @@ color clr =
 -}
 image : String -> Attribute msg
 image src =
-    Internal.Attr (VirtualDom.style "background" ("url(\"" ++ src ++ "\") center / cover no-repeat"))
+    Internal.Attr (HSA.style "background" ("url(\"" ++ src ++ "\") center / cover no-repeat"))
 
 
 {-| A centered background image that keeps its natural proportions, but scales to fit the space.
 -}
 uncropped : String -> Attribute msg
 uncropped src =
-    Internal.Attr (VirtualDom.style "background" ("url(\"" ++ src ++ "\") center / contain no-repeat"))
+    Internal.Attr (HSA.style "background" ("url(\"" ++ src ++ "\") center / contain no-repeat"))
 
 
 {-| Tile an image in the x and y axes.
 -}
 tiled : String -> Attribute msg
 tiled src =
-    Internal.Attr (VirtualDom.style "background" ("url(\"" ++ src ++ "\") repeat"))
+    Internal.Attr (HSA.style "background" ("url(\"" ++ src ++ "\") repeat"))
 
 
 {-| Tile an image in the x axis.
 -}
 tiledX : String -> Attribute msg
 tiledX src =
-    Internal.Attr (VirtualDom.style "background" ("url(\"" ++ src ++ "\") repeat-x"))
+    Internal.Attr (HSA.style "background" ("url(\"" ++ src ++ "\") repeat-x"))
 
 
 {-| Tile an image in the y axis.
 -}
 tiledY : String -> Attribute msg
 tiledY src =
-    Internal.Attr (VirtualDom.style "background" ("url(\"" ++ src ++ "\") repeat-y"))
+    Internal.Attr (HSA.style "background" ("url(\"" ++ src ++ "\") repeat-y"))
 
 
 type Direction
